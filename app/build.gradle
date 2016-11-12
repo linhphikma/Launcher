@@ -1,0 +1,92 @@
+apply plugin: 'com.android.application'
+
+File keystoreProperties = rootProject.file("keystore.properties")
+def props = new Properties()
+if (keystoreProperties.exists()) {
+    props.load(new FileInputStream(keystoreProperties))
+} else {
+    props['keystorefile'] = 'none';
+}
+
+android {
+    packagingOptions {
+        exclude 'LICENSE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'mockito-extensions/org.mockito.plugins.MockMaker'
+    }
+
+    compileSdkVersion Integer.parseInt(project.COMPILE_SDK_VERSION)
+    buildToolsVersion project.BUILD_TOOLS_VERSION
+
+    defaultConfig {
+        useJack = false
+        applicationId 'com.klinker.android.launcher'
+        minSdkVersion Integer.parseInt(project.MIN_SDK_VERSION)
+        targetSdkVersion Integer.parseInt(project.TARGET_SDK_VERSION)
+        versionCode System.getenv("BUILD_NUMBER") as Integer ?: Integer.parseInt(project.VERSION_CODE)
+        versionName project.VERSION_NAME
+    }
+
+    File keystore = new File(props['keystorefile'])
+    if (keystore.exists()) {
+        signingConfigs {
+            release {
+                storeFile keystore
+                storePassword props['keystorepassword']
+                keyAlias props['keyalias']
+                keyPassword props['keypassword']
+            }
+            debug {
+                storeFile file("../debug.keystore")
+                storePassword "android"
+                keyAlias "androiddebugkey"
+                keyPassword "android"
+            }
+        }
+
+        buildTypes {
+            debug {
+                signingConfig signingConfigs.debug
+            }
+            release {
+                shrinkResources true
+                signingConfig signingConfigs.release
+            }
+        }
+    } else {
+        signingConfigs {
+            debug {
+                storeFile file("../debug.keystore")
+                storePassword "android"
+                keyAlias "androiddebugkey"
+                keyPassword "android"
+            }
+        }
+        buildTypes {
+            debug {
+                signingConfig signingConfigs.debug
+            }
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    compile "com.android.support:support-v4:${project.ANDROID_SUPPORT_VERSION}"
+    compile "com.android.support:recyclerview-v7:${project.ANDROID_SUPPORT_VERSION}"
+
+    compile fileTree(dir: 'lib', include: ['*.jar'])
+
+    compile(name: 'android-numberpicker', ext: 'aar')
+    compile(name: 'dragsortlistview', ext: 'aar')
+
+    compile project(':wallpaper_picker')
+    compile project(':extra_pages')
+}

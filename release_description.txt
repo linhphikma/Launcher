@@ -1,0 +1,1 @@
+v2.2.0 Updates Blur to the latest Google Launcher3 code + more! Icon normalization, set the lockscreen wallpaper in Nougat, tons of style improvements, an option for whether or not you want to display the predicted apps in the drawer, and a whole lot of bug fixes.
